@@ -13,6 +13,8 @@ import (
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 )
 
+var locktime uint32
+
 func main() {
 	crypto.AddressHRP = "tpc"
 	crypto.PublicKeyHRP = "tpublic"
@@ -31,14 +33,12 @@ func main() {
 		panic(err.Error())
 	}
 
-	info, err := c.BlockchainClient.GetBlockchainInfo(context.Background(), &pactus.GetBlockchainInfoRequest{})
-	if err != nil {
-		panic(err)
-	}
-
-	locktime := info.LastBlockHeight
-
 	for i := 0; i < 1000; i++ {
+		info, err := c.BlockchainClient.GetBlockchainInfo(context.Background(), &pactus.GetBlockchainInfoRequest{})
+		if err != nil {
+			panic(err)
+		}
+		locktime = info.LastBlockHeight
 		amt := t.RandInt64(1e9)
 		fee, err := c.TransactionClient.CalculateFee(context.Background(),
 			&pactus.CalculateFeeRequest{Amount: amt, PayloadType: pactus.PayloadType_TRANSFER_PAYLOAD})
@@ -64,6 +64,6 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("TX ID: %x\nTX Num: %d\n", res.Id, i)
+		fmt.Printf("TX ID: %x\nTX Num: %d\nAmount: %v\n", res.Id, i, amt)
 	}
 }
