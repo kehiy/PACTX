@@ -1,2 +1,2 @@
 # PACTX
-Pactus transaction sender script
+Pactus Bulk Transaction Sender
