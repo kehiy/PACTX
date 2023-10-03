@@ -47,8 +47,9 @@ func main() {
 			panic(err)
 		}
 
+		receiver := t.RandAccAddress()
 		tx := tx.NewTransferTx(locktime, pk.PublicKeyNative().AccountAddress(),
-			t.RandAccAddress(), amt, fee.Fee, "test")
+			receiver, amt, fee.Fee, "test")
 
 		tx.SetPublicKey(pk.PublicKey())
 		signBytes := tx.SignBytes()
@@ -65,6 +66,6 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("TX ID: %x\nTX Num: %d\nAmount: %v\n", res.Id, i, amt)
+		fmt.Printf("TX ID: %x\nTX Num: %d\nAmount: %v\nReceiver: %v\n", res.Id, i, amt, receiver)
 	}
 }
