@@ -22,6 +22,7 @@ func main() {
 	crypto.XPublicKeyHRP = "txpublic"
 	crypto.XPrivateKeyHRP = "txsecret"
 	t := tutil.NewTestSuiteForSeed(1)
+	ctx := context.Background()
 
 	c, err := client.NewClient(os.Args[1])
 	if err != nil {
@@ -34,13 +35,13 @@ func main() {
 	}
 
 	for i := 0; i < 1000; i++ {
-		info, err := c.BlockchainClient.GetBlockchainInfo(context.Background(), &pactus.GetBlockchainInfoRequest{})
+		info, err := c.BlockchainClient.GetBlockchainInfo(ctx, &pactus.GetBlockchainInfoRequest{})
 		if err != nil {
 			panic(err)
 		}
 		locktime = info.LastBlockHeight
 		amt := t.RandInt64(1e9)
-		fee, err := c.TransactionClient.CalculateFee(context.Background(),
+		fee, err := c.TransactionClient.CalculateFee(ctx,
 			&pactus.CalculateFeeRequest{Amount: amt, PayloadType: pactus.PayloadType_TRANSFER_PAYLOAD})
 		if err != nil {
 			panic(err)
@@ -59,7 +60,7 @@ func main() {
 			panic(err)
 		}
 
-		res, err := c.TransactionClient.SendRawTransaction(context.Background(),
+		res, err := c.TransactionClient.SendRawTransaction(ctx,
 			&pactus.SendRawTransactionRequest{Data: btx})
 		if err != nil {
 			panic(err)
