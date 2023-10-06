@@ -1,7 +1,6 @@
 package client
 
 import (
-	"github.com/k0kubun/pp"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -20,8 +19,6 @@ func NewClient(endpoint string) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	pp.Println("connection established...")
 
 	return &Client{
 		NetworkClient:     pactus.NewNetworkClient(conn),
