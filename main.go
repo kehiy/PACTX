@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/kehiy/PACTX/client"
 	"github.com/pactus-project/pactus/crypto"
@@ -36,7 +37,7 @@ func main() {
 	}
 
 	transactionCount := int64(1000)
-	concurrentGoroutine := 50
+	concurrentGoroutine := 200
 
 	if len(os.Args) > 3 {
 		transactionCountArg := os.Args[3]
@@ -57,6 +58,7 @@ func main() {
 			txNum++
 		}
 		wg.Wait()
+		<-time.After(time.Second)
 	}
 }
 
