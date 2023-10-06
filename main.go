@@ -36,7 +36,7 @@ func main() {
 	}
 
 	transactionCount := int64(1000)
-	concurrentGoroutine := 200
+	concurrentGoroutine := 50
 
 	if len(os.Args) > 3 {
 		transactionCountArg := os.Args[3]
