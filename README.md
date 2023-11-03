@@ -6,8 +6,10 @@ This CLI tool helps you to send bulk transaction in Pactus network.
 
 # Usage
 
-`go run main.go [node_IP:gRPC-port] [private_key] 
-[transction count (optional|default=1000)]`
+```bash
+go run main.go [node_IP:gRPC-port] [private_key] [transction count (optional|default=1000)]
+```
+
 
 
 ## Contribution
