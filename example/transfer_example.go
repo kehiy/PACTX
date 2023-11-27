@@ -8,17 +8,17 @@ import (
 )
 
 func Example() {
-	tm, err := pt.NewTxManager("url", "privateKey")
+	tm, err := pt.NewTxManager(0, "url", "privateKey") // 0 is testnet network type.
 	if err != nil {
 		panic(err)
 	}
 
-	rawTX, err := tm.MakeTransferTransaction(context.Background(), 1000, "addr", "testTX")
+	transferTx, err := tm.MakeTransferTransaction(context.Background(), 1000, "addr", 8000, "testTX")
 	if err != nil {
 		panic(err)
 	}
 
-	result, err := tm.SendTransferTransaction(context.Background(), rawTX)
+	result, err := transferTx.Send(context.Background(), tm)
 	if err != nil {
 		panic(err)
 	}
