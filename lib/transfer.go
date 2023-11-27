@@ -9,51 +9,64 @@ import (
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 )
 
+type TransferTx struct {
+	RawTx    []byte
+	SignedTx []byte
+}
+
 func (tm *TxManager) MakeTransferTransaction(ctx context.Context, amt int64,
-	receiverAddr, memo string,
-) ([]byte, error) {
+	receiverAddr string, lockTime uint32, memo string,
+) (TransferTx, error) {
 	crypto.AddressHRP = "tpc"
 	crypto.PublicKeyHRP = "tpublic"
 	crypto.PrivateKeyHRP = "tsecret"
 	crypto.XPublicKeyHRP = "txpublic"
 	crypto.XPrivateKeyHRP = "txsecret"
 
-	info, err := tm.RPCClient.BlockchainClient.GetBlockchainInfo(ctx, &pactus.GetBlockchainInfoRequest{})
-	if err != nil {
-		return nil, err
-	}
-	lockTime := info.LastBlockHeight
-
 	fee, err := tm.RPCClient.TransactionClient.CalculateFee(ctx,
 		&pactus.CalculateFeeRequest{Amount: amt, PayloadType: pactus.PayloadType_TRANSFER_PAYLOAD})
 	if err != nil {
-		return nil, err
+		return TransferTx{}, err
 	}
 
 	recAddr, err := bls.PublicKeyFromString(receiverAddr)
 	if err != nil {
-		return nil, err
+		return TransferTx{}, err
 	}
 
 	rawTx := tx.NewTransferTx(lockTime, tm.PrivateKey.PublicKeyNative().AccountAddress(),
 		recAddr.AccountAddress(), amt, fee.Fee, memo)
+
+	rawTxBytes, err := rawTx.Bytes()
+	if err != nil {
+		return TransferTx{}, err
+	}
 
 	rawTx.SetPublicKey(tm.PrivateKey.PublicKey())
 	signBytes := rawTx.SignBytes()
 	sign := tm.PrivateKey.Sign(signBytes)
 	rawTx.SetSignature(sign)
 
-	txBytes, err := rawTx.Bytes()
+	signedTxBytes, err := rawTx.Bytes()
 	if err != nil {
-		return nil, err
+		return TransferTx{}, err
 	}
-	return txBytes, nil
+	return TransferTx{SignedTx: signedTxBytes, RawTx: rawTxBytes}, nil
 }
 
-func (tm *TxManager) SendTransferTransaction(ctx context.Context, rawTx []byte) ([]byte, error) {
-	res, err := tm.RPCClient.TransactionClient.SendRawTransaction(ctx, &pactus.SendRawTransactionRequest{Data: rawTx})
+func (tt *TransferTx) Send(ctx context.Context, tm TxManager) ([]byte, error) {
+	res, err := tm.RPCClient.TransactionClient.SendRawTransaction(ctx,
+		&pactus.SendRawTransactionRequest{Data: tt.SignedTx})
 	if err != nil {
 		return nil, err
 	}
 	return res.Id, nil
+}
+
+func (tt *TransferTx) Raw() []byte {
+	return tt.RawTx
+}
+
+func (tt *TransferTx) Signed() []byte {
+	return tt.SignedTx
 }

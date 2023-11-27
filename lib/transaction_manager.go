@@ -5,13 +5,22 @@ import (
 	"github.com/pactus-project/pactus/crypto/bls"
 )
 
+type NetworkType int
+
+const (
+	TestNet NetworkType = 0
+	MainNet NetworkType = 1
+	DevNet  NetworkType = 2
+)
+
 type TxManager struct {
-	Provider   string
-	RPCClient  *client.Client
-	PrivateKey *bls.PrivateKey
+	Provider    string
+	RPCClient   *client.Client
+	PrivateKey  *bls.PrivateKey
+	NetworkType NetworkType
 }
 
-func NewTxManager(rpcurl, privatekey string) (TxManager, error) {
+func NewTxManager(networkType NetworkType, rpcurl, privatekey string) (TxManager, error) {
 	pk, err := bls.PrivateKeyFromString(privatekey)
 	if err != nil {
 		return TxManager{}, err
@@ -23,8 +32,9 @@ func NewTxManager(rpcurl, privatekey string) (TxManager, error) {
 	}
 
 	return TxManager{
-		Provider:   rpcurl,
-		PrivateKey: pk,
-		RPCClient:  c,
+		Provider:    rpcurl,
+		PrivateKey:  pk,
+		RPCClient:   c,
+		NetworkType: networkType,
 	}, nil
 }

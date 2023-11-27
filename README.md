@@ -1,18 +1,14 @@
-# PACTX
+# PACTx
 
-Pactus Bulk Transaction Sender.
-This CLI tool helps you to send bulk transaction in Pactus network.
+<img alt="pactx" src="https://github.com/kehiy/PACTX/assets/89645414/7b82344a-634f-49c8-b94a-c3b8b2a98ee9" width="150" />
 
-You can also use PACTX as a library to make transactions with golang code.
+Pactus Transaction is a tool written in golang which help you to make, send and manage transactions in [Pactus Blockchain](https://pactus.org).
+
+
+> PACTx cli tool also helps you to send bulk transactions with different types and more without leaving terminal.
 
 
 # Usage
-
-```bash
-go run main.go [node_IP:gRPC-port] [private_key] [transction count (optional|default=1000)]
-```
-
-# Package
 
 Install:
 
@@ -33,17 +29,17 @@ import (
 )
 
 func Example() {
-	tm, err := pt.NewTxManager("url", "privateKey")
+	tm, err := pt.NewTxManager(0, "url", "privateKey") // 0 is testnet network type.
 	if err != nil {
 		panic(err)
 	}
 
-	rawTX, err := tm.MakeTransferTransaction(context.Background(), 1000, "addr", "testTX")
+	transferTx, err := tm.MakeTransferTransaction(context.Background(), 1000, "addr", 8000, "testTX")
 	if err != nil {
 		panic(err)
 	}
 
-	result, err := tm.SendTransferTransaction(context.Background(), rawTX)
+	result, err := transferTx.Send(context.Background(), tm)
 	if err != nil {
 		panic(err)
 	}
