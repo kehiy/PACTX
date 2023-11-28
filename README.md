@@ -33,13 +33,14 @@ func Example() {
 	if err != nil {
 		panic(err)
 	}
+	ctx := context.Background()
 
-	transferTx, err := tm.MakeTransferTransaction(context.Background(), 1000, "addr", 8000, "testTX")
+	transferTx, err := tm.MakeTransferTransaction(ctx, 1000, "addr", 8000, "testTX")
 	if err != nil {
 		panic(err)
 	}
 
-	result, err := transferTx.Send(context.Background(), tm)
+	result, err := transferTx.Send(ctx, tm)
 	if err != nil {
 		panic(err)
 	}
