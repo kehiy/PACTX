@@ -2,7 +2,6 @@ package lib
 
 import (
 	"github.com/kehiy/PACTX/client"
-	"github.com/pactus-project/pactus/crypto/bls"
 )
 
 // NetworkType is a type that determine which network you are using.
@@ -28,28 +27,42 @@ type TxManager struct {
 	RPCClient *client.Client
 
 	// PrivateKey is the private key of account on behalf of which transactions are made and sent.
-	PrivateKey *bls.PrivateKey
+	Accounts map[string]Account
 
 	// NetworkType helps to determine which address prefixes and HRPs should be used, like: pc, tpc and more.
 	NetworkType NetworkType
 }
 
 // NewTxManager returns a TxManager by provided parameters.
-func NewTxManager(networkType NetworkType, rpcurl, privatekey string) (TxManager, error) {
-	pk, err := bls.PrivateKeyFromString(privatekey)
+func NewTxManager(networkType NetworkType, rpcURL, privatekey, firstAccountName string) (TxManager, error) {
+	c, err := client.NewClient(rpcURL)
 	if err != nil {
 		return TxManager{}, err
 	}
 
-	c, err := client.NewClient(rpcurl)
+	acc, err := NewAccount(privatekey)
 	if err != nil {
 		return TxManager{}, err
+	}
+
+	accounts := map[string]Account{
+		firstAccountName: acc,
 	}
 
 	return TxManager{
-		Provider:    rpcurl,
-		PrivateKey:  pk,
+		Provider:    rpcURL,
+		Accounts:    accounts,
 		RPCClient:   c,
 		NetworkType: networkType,
 	}, nil
+}
+
+func (tm *TxManager) AddAccount(privateKey, name string) error {
+	acc, err := NewAccount(privateKey)
+	if err != nil {
+		return err
+	}
+
+	tm.Accounts[name] = acc
+	return nil
 }

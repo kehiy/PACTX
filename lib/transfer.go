@@ -11,7 +11,7 @@ import (
 
 // MakeTransferTransaction makes a signed Transfer transaction.
 func (tm *TxManager) MakeTransferTransaction(ctx context.Context, amt int64,
-	receiverAddr string, lockTime uint32, memo string,
+	receiverAddr string, lockTime uint32, memo, accName string,
 ) (Tx, error) {
 	crypto.AddressHRP = "tpc"
 	crypto.PublicKeyHRP = "tpublic"
@@ -33,8 +33,13 @@ func (tm *TxManager) MakeTransferTransaction(ctx context.Context, amt int64,
 		return Tx{}, err
 	}
 
+	senderAddr, ok := tm.Accounts[accName]
+	if !ok {
+		return Tx{}, ErrAccountNotFound
+	}
+
 	// making raw transaction.
-	rawTx := tx.NewTransferTx(lockTime, tm.PrivateKey.PublicKeyNative().AccountAddress(),
+	rawTx := tx.NewTransferTx(lockTime, senderAddr.Address,
 		receiverPublicKey.AccountAddress(), amt, fee.Fee, memo)
 
 	// keep raw transaction bytes for RawTx field in TransferTx.
@@ -44,9 +49,9 @@ func (tm *TxManager) MakeTransferTransaction(ctx context.Context, amt int64,
 	}
 
 	// setting publicKey, getting bytes for signing, signing the Tx and setting signature for it.
-	rawTx.SetPublicKey(tm.PrivateKey.PublicKey())
+	rawTx.SetPublicKey(senderAddr.PublicKey)
 	signBytes := rawTx.SignBytes()
-	sign := tm.PrivateKey.Sign(signBytes)
+	sign := senderAddr.PrivateKey.Sign(signBytes)
 	rawTx.SetSignature(sign)
 
 	// getting bytes of signed transaction.
@@ -59,7 +64,7 @@ func (tm *TxManager) MakeTransferTransaction(ctx context.Context, amt int64,
 
 // MakeUnsignedTransferTransaction makes a unsigned (raw) Transfer transaction.
 func (tm *TxManager) MakeUnsignedTransferTransaction(ctx context.Context, amt int64,
-	receiverAddr string, lockTime uint32, memo string,
+	receiverAddr string, lockTime uint32, memo, accName string,
 ) (Tx, error) {
 	crypto.AddressHRP = "tpc"
 	crypto.PublicKeyHRP = "tpublic"
@@ -81,8 +86,13 @@ func (tm *TxManager) MakeUnsignedTransferTransaction(ctx context.Context, amt in
 		return Tx{}, err
 	}
 
+	senderAddr, ok := tm.Accounts[accName]
+	if !ok {
+		return Tx{}, ErrAccountNotFound
+	}
+
 	// making raw transaction.
-	rawTx := tx.NewTransferTx(lockTime, tm.PrivateKey.PublicKeyNative().AccountAddress(),
+	rawTx := tx.NewTransferTx(lockTime, senderAddr.Address,
 		receiverPublicKey.AccountAddress(), amt, fee.Fee, memo)
 
 	// keep raw transaction bytes for RawTx field in TransferTx.

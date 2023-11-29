@@ -11,7 +11,7 @@ import (
 
 // MakeWithdrawTransaction makes a signed Withdraw transaction.
 func (tm *TxManager) MakeWithdrawTransaction(ctx context.Context,
-	validatorAddr, accountAddr string, amt int64, lockTime uint32, memo string,
+	validatorAddr, accountAddr string, amt int64, lockTime uint32, memo, accName string,
 ) (Tx, error) {
 	crypto.AddressHRP = "tpc"
 	crypto.PublicKeyHRP = "tpublic"
@@ -33,6 +33,11 @@ func (tm *TxManager) MakeWithdrawTransaction(ctx context.Context,
 		return Tx{}, err
 	}
 
+	senderAddr, ok := tm.Accounts[accName]
+	if !ok {
+		return Tx{}, ErrAccountNotFound
+	}
+
 	// converting receiver account address to publicKey.
 	accountPublicKey, err := bls.PublicKeyFromString(accountAddr)
 	if err != nil {
@@ -50,9 +55,9 @@ func (tm *TxManager) MakeWithdrawTransaction(ctx context.Context,
 	}
 
 	// setting publicKey, getting bytes for signing, signing the Tx and setting signature for it.
-	rawTx.SetPublicKey(tm.PrivateKey.PublicKey())
+	rawTx.SetPublicKey(senderAddr.PublicKey)
 	signBytes := rawTx.SignBytes()
-	sign := tm.PrivateKey.Sign(signBytes)
+	sign := senderAddr.PrivateKey.Sign(signBytes)
 	rawTx.SetSignature(sign)
 
 	// getting bytes of signed transaction.
@@ -76,7 +81,7 @@ func (tm *TxManager) MakeUnsignedWithdrawTransaction(ctx context.Context,
 	// getting transaction fee from network.
 	// TODO: should we get this as input?
 	fee, err := tm.RPCClient.TransactionClient.CalculateFee(ctx,
-		&pactus.CalculateFeeRequest{Amount: amt, PayloadType: pactus.PayloadType_TRANSFER_PAYLOAD})
+		&pactus.CalculateFeeRequest{Amount: amt, PayloadType: pactus.PayloadType_WITHDRAW_PAYLOAD})
 	if err != nil {
 		return Tx{}, err
 	}
