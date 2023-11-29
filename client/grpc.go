@@ -6,6 +6,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+// Client is a gRPC client of Pactus Blockchain for transactions, blockchain and network.
 type Client struct {
 	NetworkClient     pactus.NetworkClient
 	BlockchainClient  pactus.BlockchainClient
@@ -13,6 +14,7 @@ type Client struct {
 	Conn              *grpc.ClientConn
 }
 
+// NewClient get a RPC url as input and returns a Client.
 func NewClient(endpoint string) (*Client, error) {
 	conn, err := grpc.Dial(endpoint,
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -28,6 +30,7 @@ func NewClient(endpoint string) (*Client, error) {
 	}, nil
 }
 
+// Close will close the connection to RPC node.
 func (c *Client) Close() error {
 	return c.Conn.Close()
 }

@@ -9,14 +9,10 @@ import (
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 )
 
-type WithdrawTx struct {
-	RawTx    []byte
-	SignedTx []byte
-}
-
+// MakeWithdrawTransaction makes a signed Withdraw transaction.
 func (tm *TxManager) MakeWithdrawTransaction(ctx context.Context,
 	validatorAddr, accountAddr string, amt int64, lockTime uint32, memo string,
-) (WithdrawTx, error) {
+) (Tx, error) {
 	crypto.AddressHRP = "tpc"
 	crypto.PublicKeyHRP = "tpublic"
 	crypto.PrivateKeyHRP = "tsecret"
@@ -28,19 +24,19 @@ func (tm *TxManager) MakeWithdrawTransaction(ctx context.Context,
 	fee, err := tm.RPCClient.TransactionClient.CalculateFee(ctx,
 		&pactus.CalculateFeeRequest{Amount: amt, PayloadType: pactus.PayloadType_TRANSFER_PAYLOAD})
 	if err != nil {
-		return WithdrawTx{}, err
+		return Tx{}, err
 	}
 
 	// converting validator address to publicKey.
 	validatorPublicKey, err := bls.PublicKeyFromString(validatorAddr)
 	if err != nil {
-		return WithdrawTx{}, err
+		return Tx{}, err
 	}
 
 	// converting receiver account address to publicKey.
 	accountPublicKey, err := bls.PublicKeyFromString(accountAddr)
 	if err != nil {
-		return WithdrawTx{}, err
+		return Tx{}, err
 	}
 
 	// making raw transaction.
@@ -50,7 +46,7 @@ func (tm *TxManager) MakeWithdrawTransaction(ctx context.Context,
 	// keep raw transaction bytes for RawTx field in TransferTx.
 	rawTxBytes, err := rawTx.Bytes()
 	if err != nil {
-		return WithdrawTx{}, err
+		return Tx{}, err
 	}
 
 	// setting publicKey, getting bytes for signing, signing the Tx and setting signature for it.
@@ -62,14 +58,15 @@ func (tm *TxManager) MakeWithdrawTransaction(ctx context.Context,
 	// getting bytes of signed transaction.
 	signedTxBytes, err := rawTx.Bytes()
 	if err != nil {
-		return WithdrawTx{}, err
+		return Tx{}, err
 	}
-	return WithdrawTx{SignedTx: signedTxBytes, RawTx: rawTxBytes}, nil
+	return Tx{SignedTx: signedTxBytes, RawTx: rawTxBytes}, nil
 }
 
+// MakeUnsignedWithdrawTransaction makes a unsigned (raw) Withdraw transaction.
 func (tm *TxManager) MakeUnsignedWithdrawTransaction(ctx context.Context,
 	validatorAddr, accountAddr string, amt int64, lockTime uint32, memo string,
-) (WithdrawTx, error) {
+) (Tx, error) {
 	crypto.AddressHRP = "tpc"
 	crypto.PublicKeyHRP = "tpublic"
 	crypto.PrivateKeyHRP = "tsecret"
@@ -81,19 +78,19 @@ func (tm *TxManager) MakeUnsignedWithdrawTransaction(ctx context.Context,
 	fee, err := tm.RPCClient.TransactionClient.CalculateFee(ctx,
 		&pactus.CalculateFeeRequest{Amount: amt, PayloadType: pactus.PayloadType_TRANSFER_PAYLOAD})
 	if err != nil {
-		return WithdrawTx{}, err
+		return Tx{}, err
 	}
 
 	// converting validator address to publicKey.
 	validatorPublicKey, err := bls.PublicKeyFromString(validatorAddr)
 	if err != nil {
-		return WithdrawTx{}, err
+		return Tx{}, err
 	}
 
 	// converting receiver account address to publicKey.
 	accountPublicKey, err := bls.PublicKeyFromString(accountAddr)
 	if err != nil {
-		return WithdrawTx{}, err
+		return Tx{}, err
 	}
 
 	// making raw transaction.
@@ -103,25 +100,8 @@ func (tm *TxManager) MakeUnsignedWithdrawTransaction(ctx context.Context,
 	// keep raw transaction bytes for RawTx field in TransferTx.
 	rawTxBytes, err := rawTx.Bytes()
 	if err != nil {
-		return WithdrawTx{}, err
+		return Tx{}, err
 	}
 
-	return WithdrawTx{SignedTx: make([]byte, 0), RawTx: rawTxBytes}, nil
-}
-
-func (tt *WithdrawTx) Send(ctx context.Context, tm TxManager) ([]byte, error) {
-	res, err := tm.RPCClient.TransactionClient.SendRawTransaction(ctx,
-		&pactus.SendRawTransactionRequest{Data: tt.SignedTx})
-	if err != nil {
-		return nil, err
-	}
-	return res.Id, nil
-}
-
-func (tt *WithdrawTx) Raw() []byte {
-	return tt.RawTx
-}
-
-func (tt *WithdrawTx) Signed() []byte {
-	return tt.SignedTx
+	return Tx{SignedTx: make([]byte, 0), RawTx: rawTxBytes}, nil
 }
