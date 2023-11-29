@@ -10,24 +10,49 @@ import (
 type Tx struct {
 	RawTx    []byte
 	SignedTx []byte
+
+	// ID will be filled when Send method called.
+	ID []byte
 }
 
 // Send sends (publish, broadcasts) a transaction to the network using RPC node urls.
-func (tt *Tx) Send(ctx context.Context, tm TxManager) ([]byte, error) {
+func (tx *Tx) Send(ctx context.Context, tm TxManager) ([]byte, error) {
 	res, err := tm.RPCClient.TransactionClient.SendRawTransaction(ctx,
-		&pactus.SendRawTransactionRequest{Data: tt.SignedTx})
+		&pactus.SendRawTransactionRequest{Data: tx.SignedTx})
 	if err != nil {
 		return nil, err
 	}
+	tx.ID = res.Id
+
 	return res.Id, nil
 }
 
 // Raw returns bytes of a raw (unsigned) transaction.
-func (tt *Tx) Raw() []byte {
-	return tt.RawTx
+func (tx *Tx) Raw() []byte {
+	return tx.RawTx
 }
 
 // Signed returns bytes of transaction which is signed by a private key and have a signature.
-func (tt *Tx) Signed() []byte {
-	return tt.SignedTx
+func (tx *Tx) Signed() []byte {
+	return tx.SignedTx
+}
+
+func (tx *Tx) GetInfo(ctx context.Context, tm TxManager) (*pactus.GetTransactionResponse, error) {
+	res, err := tm.RPCClient.TransactionClient.GetTransaction(ctx,
+		&pactus.GetTransactionRequest{Id: tx.ID, Verbosity: pactus.TransactionVerbosity_TRANSACTION_INFO})
+	if err != nil {
+		return &pactus.GetTransactionResponse{}, err
+	}
+
+	return res, nil
+}
+
+func (tx *Tx) GetData(ctx context.Context, tm TxManager) (*pactus.GetTransactionResponse, error) {
+	res, err := tm.RPCClient.TransactionClient.GetTransaction(ctx,
+		&pactus.GetTransactionRequest{Id: tx.ID, Verbosity: pactus.TransactionVerbosity_TRANSACTION_DATA})
+	if err != nil {
+		return &pactus.GetTransactionResponse{}, err
+	}
+
+	return res, nil
 }
