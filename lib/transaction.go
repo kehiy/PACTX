@@ -37,6 +37,7 @@ func (tx *Tx) Signed() []byte {
 	return tx.SignedTx
 }
 
+// GetInfo will get a transaction info from network.
 func (tx *Tx) GetInfo(ctx context.Context, tm TxManager) (*pactus.GetTransactionResponse, error) {
 	res, err := tm.RPCClient.TransactionClient.GetTransaction(ctx,
 		&pactus.GetTransactionRequest{Id: tx.ID, Verbosity: pactus.TransactionVerbosity_TRANSACTION_INFO})
@@ -47,6 +48,7 @@ func (tx *Tx) GetInfo(ctx context.Context, tm TxManager) (*pactus.GetTransaction
 	return res, nil
 }
 
+// GetData will get a transaction data from network.
 func (tx *Tx) GetData(ctx context.Context, tm TxManager) (*pactus.GetTransactionResponse, error) {
 	res, err := tm.RPCClient.TransactionClient.GetTransaction(ctx,
 		&pactus.GetTransactionRequest{Id: tx.ID, Verbosity: pactus.TransactionVerbosity_TRANSACTION_DATA})

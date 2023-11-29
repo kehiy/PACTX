@@ -40,7 +40,7 @@ func NewTxManager(networkType NetworkType, rpcURL, privatekey, firstAccountName 
 		return TxManager{}, err
 	}
 
-	acc, err := NewAccount(privatekey)
+	acc, err := newAccount(privatekey)
 	if err != nil {
 		return TxManager{}, err
 	}
@@ -58,7 +58,7 @@ func NewTxManager(networkType NetworkType, rpcURL, privatekey, firstAccountName 
 }
 
 func (tm *TxManager) AddAccount(privateKey, name string) error {
-	acc, err := NewAccount(privateKey)
+	acc, err := newAccount(privateKey)
 	if err != nil {
 		return err
 	}
