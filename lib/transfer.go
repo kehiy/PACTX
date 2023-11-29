@@ -9,14 +9,10 @@ import (
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 )
 
-type TransferTx struct {
-	RawTx    []byte
-	SignedTx []byte
-}
-
+// MakeTransferTransaction makes a signed Transfer transaction.
 func (tm *TxManager) MakeTransferTransaction(ctx context.Context, amt int64,
 	receiverAddr string, lockTime uint32, memo string,
-) (TransferTx, error) {
+) (Tx, error) {
 	crypto.AddressHRP = "tpc"
 	crypto.PublicKeyHRP = "tpublic"
 	crypto.PrivateKeyHRP = "tsecret"
@@ -28,13 +24,13 @@ func (tm *TxManager) MakeTransferTransaction(ctx context.Context, amt int64,
 	fee, err := tm.RPCClient.TransactionClient.CalculateFee(ctx,
 		&pactus.CalculateFeeRequest{Amount: amt, PayloadType: pactus.PayloadType_TRANSFER_PAYLOAD})
 	if err != nil {
-		return TransferTx{}, err
+		return Tx{}, err
 	}
 
 	// converting receiver address to publicKey.
 	receiverPublicKey, err := bls.PublicKeyFromString(receiverAddr)
 	if err != nil {
-		return TransferTx{}, err
+		return Tx{}, err
 	}
 
 	// making raw transaction.
@@ -44,7 +40,7 @@ func (tm *TxManager) MakeTransferTransaction(ctx context.Context, amt int64,
 	// keep raw transaction bytes for RawTx field in TransferTx.
 	rawTxBytes, err := rawTx.Bytes()
 	if err != nil {
-		return TransferTx{}, err
+		return Tx{}, err
 	}
 
 	// setting publicKey, getting bytes for signing, signing the Tx and setting signature for it.
@@ -56,14 +52,15 @@ func (tm *TxManager) MakeTransferTransaction(ctx context.Context, amt int64,
 	// getting bytes of signed transaction.
 	signedTxBytes, err := rawTx.Bytes()
 	if err != nil {
-		return TransferTx{}, err
+		return Tx{}, err
 	}
-	return TransferTx{SignedTx: signedTxBytes, RawTx: rawTxBytes}, nil
+	return Tx{SignedTx: signedTxBytes, RawTx: rawTxBytes}, nil
 }
 
+// MakeUnsignedTransferTransaction makes a unsigned (raw) Transfer transaction.
 func (tm *TxManager) MakeUnsignedTransferTransaction(ctx context.Context, amt int64,
 	receiverAddr string, lockTime uint32, memo string,
-) (TransferTx, error) {
+) (Tx, error) {
 	crypto.AddressHRP = "tpc"
 	crypto.PublicKeyHRP = "tpublic"
 	crypto.PrivateKeyHRP = "tsecret"
@@ -75,13 +72,13 @@ func (tm *TxManager) MakeUnsignedTransferTransaction(ctx context.Context, amt in
 	fee, err := tm.RPCClient.TransactionClient.CalculateFee(ctx,
 		&pactus.CalculateFeeRequest{Amount: amt, PayloadType: pactus.PayloadType_TRANSFER_PAYLOAD})
 	if err != nil {
-		return TransferTx{}, err
+		return Tx{}, err
 	}
 
 	// converting receiver address to publicKey.
 	receiverPublicKey, err := bls.PublicKeyFromString(receiverAddr)
 	if err != nil {
-		return TransferTx{}, err
+		return Tx{}, err
 	}
 
 	// making raw transaction.
@@ -91,25 +88,8 @@ func (tm *TxManager) MakeUnsignedTransferTransaction(ctx context.Context, amt in
 	// keep raw transaction bytes for RawTx field in TransferTx.
 	rawTxBytes, err := rawTx.Bytes()
 	if err != nil {
-		return TransferTx{}, err
+		return Tx{}, err
 	}
 
-	return TransferTx{SignedTx: make([]byte, 0), RawTx: rawTxBytes}, nil
-}
-
-func (tt *TransferTx) Send(ctx context.Context, tm TxManager) ([]byte, error) {
-	res, err := tm.RPCClient.TransactionClient.SendRawTransaction(ctx,
-		&pactus.SendRawTransactionRequest{Data: tt.SignedTx})
-	if err != nil {
-		return nil, err
-	}
-	return res.Id, nil
-}
-
-func (tt *TransferTx) Raw() []byte {
-	return tt.RawTx
-}
-
-func (tt *TransferTx) Signed() []byte {
-	return tt.SignedTx
+	return Tx{SignedTx: make([]byte, 0), RawTx: rawTxBytes}, nil
 }
