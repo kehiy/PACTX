@@ -11,7 +11,7 @@ import (
 
 // MakeBondTransaction makes a signed Bond transaction.
 func (tm *TxManager) MakeBondTransaction(ctx context.Context, stake int64,
-	receiverAddr string, lockTime uint32, memo string,
+	receiverAddr string, lockTime uint32, memo, accName string,
 ) (Tx, error) {
 	crypto.AddressHRP = "tpc"
 	crypto.PublicKeyHRP = "tpublic"
@@ -33,8 +33,13 @@ func (tm *TxManager) MakeBondTransaction(ctx context.Context, stake int64,
 		return Tx{}, err
 	}
 
+	senderAddr, ok := tm.Accounts[accName]
+	if !ok {
+		return Tx{}, ErrAccountNotFound
+	}
+
 	// making raw transaction.
-	rawTx := tx.NewBondTx(lockTime, tm.PrivateKey.PublicKeyNative().AccountAddress(),
+	rawTx := tx.NewBondTx(lockTime, senderAddr.Address,
 		receiverPublicKey.AccountAddress(), receiverPublicKey, stake, fee.Fee, memo)
 
 	// keep raw transaction bytes for RawTx field in TransferTx.
@@ -44,9 +49,9 @@ func (tm *TxManager) MakeBondTransaction(ctx context.Context, stake int64,
 	}
 
 	// setting publicKey, getting bytes for signing, signing the Tx and setting signature for it.
-	rawTx.SetPublicKey(tm.PrivateKey.PublicKey())
+	rawTx.SetPublicKey(senderAddr.PublicKey)
 	signBytes := rawTx.SignBytes()
-	sign := tm.PrivateKey.Sign(signBytes)
+	sign := senderAddr.PrivateKey.Sign(signBytes)
 	rawTx.SetSignature(sign)
 
 	// getting bytes of signed transaction.
@@ -59,7 +64,7 @@ func (tm *TxManager) MakeBondTransaction(ctx context.Context, stake int64,
 
 // MakeUnsignedBondTransaction makes a unsigned (raw) Bond transaction.
 func (tm *TxManager) MakeUnsignedBondTransaction(ctx context.Context, stake int64,
-	receiverAddr string, lockTime uint32, memo string,
+	receiverAddr string, lockTime uint32, memo, accName string,
 ) (Tx, error) {
 	crypto.AddressHRP = "tpc"
 	crypto.PublicKeyHRP = "tpublic"
@@ -70,7 +75,7 @@ func (tm *TxManager) MakeUnsignedBondTransaction(ctx context.Context, stake int6
 	// getting transaction fee from network.
 	// TODO: should we get this as input?
 	fee, err := tm.RPCClient.TransactionClient.CalculateFee(ctx,
-		&pactus.CalculateFeeRequest{Amount: stake, PayloadType: pactus.PayloadType_TRANSFER_PAYLOAD})
+		&pactus.CalculateFeeRequest{Amount: stake, PayloadType: pactus.PayloadType_BOND_PAYLOAD})
 	if err != nil {
 		return Tx{}, err
 	}
@@ -81,8 +86,13 @@ func (tm *TxManager) MakeUnsignedBondTransaction(ctx context.Context, stake int6
 		return Tx{}, err
 	}
 
+	senderAddr, ok := tm.Accounts[accName]
+	if !ok {
+		return Tx{}, ErrAccountNotFound
+	}
+
 	// making raw transaction.
-	rawTx := tx.NewBondTx(lockTime, tm.PrivateKey.PublicKeyNative().AccountAddress(),
+	rawTx := tx.NewBondTx(lockTime, senderAddr.Address,
 		receiverPublicKey.AccountAddress(), receiverPublicKey, stake, fee.Fee, memo)
 
 	// keep raw transaction bytes for RawTx field in TransferTx.

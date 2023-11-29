@@ -7,7 +7,8 @@ import (
 )
 
 // MakeUnBondTransaction makes a signed UnBond transaction.
-func (tm *TxManager) MakeUnBondTransaction(validatorAddr string, lockTime uint32, memo string,
+func (tm *TxManager) MakeUnBondTransaction(validatorAddr string, lockTime uint32,
+	memo, accName string,
 ) (Tx, error) {
 	crypto.AddressHRP = "tpc"
 	crypto.PublicKeyHRP = "tpublic"
@@ -21,6 +22,11 @@ func (tm *TxManager) MakeUnBondTransaction(validatorAddr string, lockTime uint32
 		return Tx{}, err
 	}
 
+	senderAddr, ok := tm.Accounts[accName]
+	if !ok {
+		return Tx{}, ErrAccountNotFound
+	}
+
 	// making raw transaction.
 	rawTx := tx.NewUnbondTx(lockTime, validatorPublicKey.AccountAddress(), memo)
 
@@ -31,9 +37,9 @@ func (tm *TxManager) MakeUnBondTransaction(validatorAddr string, lockTime uint32
 	}
 
 	// setting publicKey, getting bytes for signing, signing the Tx and setting signature for it.
-	rawTx.SetPublicKey(tm.PrivateKey.PublicKey())
+	rawTx.SetPublicKey(senderAddr.PublicKey)
 	signBytes := rawTx.SignBytes()
-	sign := tm.PrivateKey.Sign(signBytes)
+	sign := senderAddr.PrivateKey.Sign(signBytes)
 	rawTx.SetSignature(sign)
 
 	// getting bytes of signed transaction.
