@@ -34,22 +34,22 @@ type TxManager struct {
 }
 
 // NewTxManager returns a TxManager by provided parameters.
-func NewTxManager(networkType NetworkType, rpcURL, privatekey, firstAccountName string) (TxManager, error) {
+func NewTxManager(networkType NetworkType, rpcURL, privatekey, firstAccountName string) (*TxManager, error) {
 	c, err := client.NewClient(rpcURL)
 	if err != nil {
-		return TxManager{}, err
+		return &TxManager{}, err
 	}
 
 	acc, err := newAccount(privatekey)
 	if err != nil {
-		return TxManager{}, err
+		return &TxManager{}, err
 	}
 
 	accounts := map[string]Account{
 		firstAccountName: acc,
 	}
 
-	return TxManager{
+	return &TxManager{
 		Provider:    rpcURL,
 		Accounts:    accounts,
 		RPCClient:   c,
@@ -57,6 +57,12 @@ func NewTxManager(networkType NetworkType, rpcURL, privatekey, firstAccountName 
 	}, nil
 }
 
+// Close will close all connections and ... in a transaction manager.
+func (tm *TxManager) Close() error {
+	return tm.RPCClient.Conn.Close()
+}
+
+// AddAccount get a name and private key as input and add a new account to the transaction manager accounts list.
 func (tm *TxManager) AddAccount(privateKey, name string) error {
 	acc, err := newAccount(privateKey)
 	if err != nil {

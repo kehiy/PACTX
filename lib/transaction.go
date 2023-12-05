@@ -16,7 +16,7 @@ type Tx struct {
 }
 
 // Send sends (publish, broadcasts) a transaction to the network using RPC node urls.
-func (tx *Tx) Send(ctx context.Context, tm TxManager) ([]byte, error) {
+func (tx *Tx) Send(ctx context.Context, tm *TxManager) ([]byte, error) {
 	res, err := tm.RPCClient.TransactionClient.SendRawTransaction(ctx,
 		&pactus.SendRawTransactionRequest{Data: tx.SignedTx})
 	if err != nil {

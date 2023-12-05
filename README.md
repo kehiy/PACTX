@@ -30,20 +30,17 @@ func Example() {
 	ctx := context.Background()
 
 	/*
-	0 is testnet network type.
+			account name will point to this specific private key.
+		    (you can have multiple private keys with different names (multiple pacuts accounts))
 
-	account name will point to this specific private key.
-	you can have multiple private keys with different names
-
-	consider to get private key from and env, config file and ...
+			consider to get private key from and env, config file and ...
 	*/
-	tm, err := pt.NewTxManager(0, "url", "private-key", "first-account-name")
+	tm, err := pt.NewTxManager(pt.TestNet, "url", "private-key", "first-account-name")
 	if err != nil {
 		panic(err)
 	}
 
-	transferTx, err := tm.MakeTransferTransaction(ctx, 1000, "addr", 8000,
-	 "testTX", "first-account-name")
+	transferTx, err := tm.MakeTransferTransaction(ctx, 1000, "addr", 8000, "test-transaction", "first-account-name")
 	if err != nil {
 		panic(err)
 	}
@@ -53,7 +50,7 @@ func Example() {
 		panic(err)
 	}
 
-	fmt.Printf("%v", string(result)) // result is your transaction ID.
+	fmt.Printf("%x", result) // result is your transaction ID.
 
 	err = tm.AddAccount("second-private-key", "second-account-name")
 	if err != nil {
