@@ -4,7 +4,7 @@
 
 Pactus Transaction is a tool written in golang which help you to make, send and manage transactions in [Pactus Blockchain](https://pactus.org) using multiple account with a good control.
 
-> PACTx cli tool also helps you to send bulk transactions with different types and more without leaving terminal.
+> PACTx cli tool also helps you to use transaction utils without leaving terminal.
 
 # Usage
 
