@@ -15,6 +15,8 @@ func Example() {
 		    (you can have multiple private keys with different names (multiple pacuts accounts))
 
 			consider to get private key from and env, config file and ...
+			also you can make an empty account by setting privateKey and name to "".
+			(make sure to don't use empty account to send a transaction)
 	*/
 	tm, err := pt.NewTxManager(pt.TestNet, "url", "private-key", "first-account-name")
 	if err != nil {
