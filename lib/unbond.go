@@ -1,7 +1,6 @@
 package lib
 
 import (
-	"github.com/pactus-project/pactus/crypto"
 	"github.com/pactus-project/pactus/crypto/bls"
 	"github.com/pactus-project/pactus/types/tx"
 )
@@ -10,12 +9,6 @@ import (
 func (tm *TxManager) MakeUnBondTransaction(validatorAddr string, lockTime uint32,
 	memo, accName string,
 ) (Tx, error) {
-	crypto.AddressHRP = "tpc"
-	crypto.PublicKeyHRP = "tpublic"
-	crypto.PrivateKeyHRP = "tsecret"
-	crypto.XPublicKeyHRP = "txpublic"
-	crypto.XPrivateKeyHRP = "txsecret"
-
 	// converting receiver address to publicKey.
 	validatorPublicKey, err := bls.PublicKeyFromString(validatorAddr)
 	if err != nil {
@@ -53,12 +46,6 @@ func (tm *TxManager) MakeUnBondTransaction(validatorAddr string, lockTime uint32
 // MakeUnsignedUnBondTransaction makes a unsigned (raw) UnBond transaction.
 func (tm *TxManager) MakeUnsignedUnBondTransaction(validatorAddr string, lockTime uint32, memo string,
 ) (Tx, error) {
-	crypto.AddressHRP = "tpc"
-	crypto.PublicKeyHRP = "tpublic"
-	crypto.PrivateKeyHRP = "tsecret"
-	crypto.XPublicKeyHRP = "txpublic"
-	crypto.XPrivateKeyHRP = "txsecret"
-
 	// converting receiver address to publicKey.
 	validatorPublicKey, err := bls.PublicKeyFromString(validatorAddr)
 	if err != nil {

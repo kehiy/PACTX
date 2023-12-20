@@ -2,6 +2,7 @@ package lib
 
 import (
 	"github.com/kehiy/PACTX/client"
+	"github.com/pactus-project/pactus/crypto"
 )
 
 // NetworkType is a type that determine which network you are using.
@@ -13,9 +14,6 @@ const (
 
 	// MainNet network type is Pactus mainnet.
 	MainNet NetworkType = 1
-
-	// DevNet network type is Pactus dev-net or a private network on pactus protocol you are running.
-	DevNet NetworkType = 2
 )
 
 // TxManager helps you to make, send and work with transaction in Pactus Blockchain.
@@ -37,16 +35,32 @@ type TxManager struct {
 func NewTxManager(networkType NetworkType, rpcURL, privatekey, firstAccountName string) (*TxManager, error) {
 	c, err := client.NewClient(rpcURL)
 	if err != nil {
-		return &TxManager{}, err
+		return nil, err
 	}
 
 	acc, err := newAccount(privatekey)
 	if err != nil {
-		return &TxManager{}, err
+		return nil, err
 	}
 
 	accounts := map[string]Account{
 		firstAccountName: acc,
+	}
+
+	if networkType == MainNet {
+		crypto.AddressHRP = "pc"
+		crypto.PublicKeyHRP = "public"
+		crypto.PrivateKeyHRP = "secret"
+		crypto.XPublicKeyHRP = "xpublic"
+		crypto.XPrivateKeyHRP = "xsecret"
+	} else if networkType == TestNet {
+		crypto.AddressHRP = "tpc"
+		crypto.PublicKeyHRP = "tpublic"
+		crypto.PrivateKeyHRP = "tsecret"
+		crypto.XPublicKeyHRP = "txpublic"
+		crypto.XPrivateKeyHRP = "txsecret"
+	} else {
+		return nil, ErrInvalidNetworkType
 	}
 
 	return &TxManager{

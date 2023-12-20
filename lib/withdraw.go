@@ -3,7 +3,6 @@ package lib
 import (
 	"context"
 
-	"github.com/pactus-project/pactus/crypto"
 	"github.com/pactus-project/pactus/crypto/bls"
 	"github.com/pactus-project/pactus/types/tx"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
@@ -13,12 +12,6 @@ import (
 func (tm *TxManager) MakeWithdrawTransaction(ctx context.Context,
 	validatorAddr, accountAddr string, amt int64, lockTime uint32, memo, accName string,
 ) (Tx, error) {
-	crypto.AddressHRP = "tpc"
-	crypto.PublicKeyHRP = "tpublic"
-	crypto.PrivateKeyHRP = "tsecret"
-	crypto.XPublicKeyHRP = "txpublic"
-	crypto.XPrivateKeyHRP = "txsecret"
-
 	// getting transaction fee from network.
 	// TODO: should we get this as input?
 	fee, err := tm.RPCClient.TransactionClient.CalculateFee(ctx,
@@ -72,12 +65,6 @@ func (tm *TxManager) MakeWithdrawTransaction(ctx context.Context,
 func (tm *TxManager) MakeUnsignedWithdrawTransaction(ctx context.Context,
 	validatorAddr, accountAddr string, amt int64, lockTime uint32, memo string,
 ) (Tx, error) {
-	crypto.AddressHRP = "tpc"
-	crypto.PublicKeyHRP = "tpublic"
-	crypto.PrivateKeyHRP = "tsecret"
-	crypto.XPublicKeyHRP = "txpublic"
-	crypto.XPrivateKeyHRP = "txsecret"
-
 	// getting transaction fee from network.
 	// TODO: should we get this as input?
 	fee, err := tm.RPCClient.TransactionClient.CalculateFee(ctx,
