@@ -13,9 +13,6 @@ const (
 
 	// MainNet network type is Pactus mainnet.
 	MainNet NetworkType = 1
-
-	// DevNet network type is Pactus dev-net or a private network on pactus protocol you are running.
-	DevNet NetworkType = 2
 )
 
 // TxManager helps you to make, send and work with transaction in Pactus Blockchain.

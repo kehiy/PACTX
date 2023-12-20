@@ -10,11 +10,19 @@ import (
 func (tm *TxManager) MakeUnBondTransaction(validatorAddr string, lockTime uint32,
 	memo, accName string,
 ) (Tx, error) {
-	crypto.AddressHRP = "tpc"
-	crypto.PublicKeyHRP = "tpublic"
-	crypto.PrivateKeyHRP = "tsecret"
-	crypto.XPublicKeyHRP = "txpublic"
-	crypto.XPrivateKeyHRP = "txsecret"
+	if tm.NetworkType == TestNet {
+		crypto.AddressHRP = "tpc"
+		crypto.PublicKeyHRP = "tpublic"
+		crypto.PrivateKeyHRP = "tsecret"
+		crypto.XPublicKeyHRP = "txpublic"
+		crypto.XPrivateKeyHRP = "txsecret"
+	} else {
+		crypto.AddressHRP = "pc"
+		crypto.PublicKeyHRP = "public"
+		crypto.PrivateKeyHRP = "secret"
+		crypto.XPublicKeyHRP = "xpublic"
+		crypto.XPrivateKeyHRP = "xsecret"
+	}
 
 	// converting receiver address to publicKey.
 	validatorPublicKey, err := bls.PublicKeyFromString(validatorAddr)
@@ -53,11 +61,19 @@ func (tm *TxManager) MakeUnBondTransaction(validatorAddr string, lockTime uint32
 // MakeUnsignedUnBondTransaction makes a unsigned (raw) UnBond transaction.
 func (tm *TxManager) MakeUnsignedUnBondTransaction(validatorAddr string, lockTime uint32, memo string,
 ) (Tx, error) {
-	crypto.AddressHRP = "tpc"
-	crypto.PublicKeyHRP = "tpublic"
-	crypto.PrivateKeyHRP = "tsecret"
-	crypto.XPublicKeyHRP = "txpublic"
-	crypto.XPrivateKeyHRP = "txsecret"
+	if tm.NetworkType == TestNet {
+		crypto.AddressHRP = "tpc"
+		crypto.PublicKeyHRP = "tpublic"
+		crypto.PrivateKeyHRP = "tsecret"
+		crypto.XPublicKeyHRP = "txpublic"
+		crypto.XPrivateKeyHRP = "txsecret"
+	} else {
+		crypto.AddressHRP = "pc"
+		crypto.PublicKeyHRP = "public"
+		crypto.PrivateKeyHRP = "secret"
+		crypto.XPublicKeyHRP = "xpublic"
+		crypto.XPrivateKeyHRP = "xsecret"
+	}
 
 	// converting receiver address to publicKey.
 	validatorPublicKey, err := bls.PublicKeyFromString(validatorAddr)

@@ -13,11 +13,19 @@ import (
 func (tm *TxManager) MakeBondTransaction(ctx context.Context, stake int64,
 	receiverAddr string, lockTime uint32, memo, accName string,
 ) (Tx, error) {
-	crypto.AddressHRP = "tpc"
-	crypto.PublicKeyHRP = "tpublic"
-	crypto.PrivateKeyHRP = "tsecret"
-	crypto.XPublicKeyHRP = "txpublic"
-	crypto.XPrivateKeyHRP = "txsecret"
+	if tm.NetworkType == TestNet {
+		crypto.AddressHRP = "tpc"
+		crypto.PublicKeyHRP = "tpublic"
+		crypto.PrivateKeyHRP = "tsecret"
+		crypto.XPublicKeyHRP = "txpublic"
+		crypto.XPrivateKeyHRP = "txsecret"
+	} else {
+		crypto.AddressHRP = "pc"
+		crypto.PublicKeyHRP = "public"
+		crypto.PrivateKeyHRP = "secret"
+		crypto.XPublicKeyHRP = "xpublic"
+		crypto.XPrivateKeyHRP = "xsecret"
+	}
 
 	// getting transaction fee from network.
 	// TODO: should we get this as input?
@@ -66,11 +74,19 @@ func (tm *TxManager) MakeBondTransaction(ctx context.Context, stake int64,
 func (tm *TxManager) MakeUnsignedBondTransaction(ctx context.Context, stake int64,
 	receiverAddr string, lockTime uint32, memo, accName string,
 ) (Tx, error) {
-	crypto.AddressHRP = "tpc"
-	crypto.PublicKeyHRP = "tpublic"
-	crypto.PrivateKeyHRP = "tsecret"
-	crypto.XPublicKeyHRP = "txpublic"
-	crypto.XPrivateKeyHRP = "txsecret"
+	if tm.NetworkType == TestNet {
+		crypto.AddressHRP = "tpc"
+		crypto.PublicKeyHRP = "tpublic"
+		crypto.PrivateKeyHRP = "tsecret"
+		crypto.XPublicKeyHRP = "txpublic"
+		crypto.XPrivateKeyHRP = "txsecret"
+	} else {
+		crypto.AddressHRP = "pc"
+		crypto.PublicKeyHRP = "public"
+		crypto.PrivateKeyHRP = "secret"
+		crypto.XPublicKeyHRP = "xpublic"
+		crypto.XPrivateKeyHRP = "xsecret"
+	}
 
 	// getting transaction fee from network.
 	// TODO: should we get this as input?
